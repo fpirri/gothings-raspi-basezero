@@ -1,0 +1,13 @@
+{         "name": "raspi-test-nodebase"
+,      "private": true
+,      "version": "0.1.1"
+,  "description": "Main server for a simple test"
+,       "author": "vmaticFP"
+,      "scripts": {  "base": "/home/node/app/startbase.sh"
+                   ,"start": "npm run base"
+                  }
+, "dependencies": {"express": "*"
+                   ,  "http": "*"
+                   ,    "ip": "*"
+                  }
+}

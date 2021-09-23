@@ -1,0 +1,125 @@
+#                                                                               2021-03-30
+#
+#  NGINX service definition nella droplet gothings-vo9-db
+#
+#  =============================================================================
+#
+#  Inizialmente copiato da .../gothings/base/dockrepo/sysdata/base/gothingsbase.yml
+#    <-- poi adattato alla nuova droplet
+#
+##############
+#  nginx     nginx proxy + certbot                               version 0.01.09
+#
+#            container implements a gateway from network to internal applications
+#            it is a reverse proxy http server
+#            it is differs only marginally from Fase 0 & 1
+#            base image: gothings/nginx:arm-002
+#            nginx version: openresty:1.15.8.2-6-buster
+#    
+###############
+
+#### vedi:  .../raspi-apps/base/dockrepo/sysdata/nodedata/nodebase/package.json
+
+version: '3'
+
+networks:
+  gothingsnet:
+    external: true
+    # ipv4_addresses:
+    #   172.29.196.180 : nginx
+    #   172.29.196.181 : redis
+    #   172.29.196.182 : logspout
+    #   172.29.196.183 : nodesyslog
+    #   172.29.196.184 : 
+    #   172.29.196.185 : testvue
+    #   172.29.196.186 : nodebase
+    # 
+    #   172.29.196.100 : node-test
+    #   172.29.196.101 : node-srv2
+    # 
+  servicenet:
+    external: true
+    # ipv4_addresses:
+    #   172.29.195.180 : nginx
+    #   172.29.195.181 : redis
+    #   172.29.195.182 : logspout
+    #   172.29.195.183 : nodesyslog
+    #   172.29.195.184 : mongo
+    #   172.29.195.185 : testvue
+    #   172.29.195.185 : base
+    # 
+    #   172.29.196.100 : node-test
+    #   172.29.196.101 : node-srv2
+    #
+    ############
+    #
+
+services:
+  nginx:
+    image: hlite/nginx:arm6vl-002
+    container_name: nginx
+    #restart: unless-stopped
+    volumes:
+      #   'sito globale' per i dati delle app
+      - /home/pi/dockrepo/sysdata/raspi-test/var_www/:/var/www/
+      ###### configurazione proxy
+      - /home/pi/dockrepo/sysdata/raspi-test/nginxdata/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf
+      - /home/pi/dockrepo/sysdata/raspi-test/nginxdata/conf.d:/usr/local/openresty/nginx/conf/conf.d/
+      - /home/pi/dockrepo/sysdata/raspi-test/nginxdata/sites-enabled:/usr/local/openresty/nginx/conf/sites-enabled/
+      ###### contenuto siti
+      #   sito nginx/test
+      - /home/pi/dockrepo/sysdata/raspi-test/htdocs/test:/var/www/test
+      #   locazione ausiliaria per nginx/lua
+      - /home/pi/dockrepo/sysdata/raspi-test/htdocs/lua:/var/www/lua
+    networks: 
+      gothingsnet:  
+        ipv4_address: 172.29.196.180
+      servicenet:  
+        ipv4_address: 172.29.195.180
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "443:443"
+      
+  node-main: 
+    image: arm32v6/node:16-alpine3.11
+    container_name: node-main
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - /home/pi/dockrepo/sysdata/raspi-test/nodebase/:/home/node/app
+    networks: 
+      gothingsnet:  
+        ipv4_address: 172.29.196.100
+      servicenet:  
+        ipv4_address: 172.29.195.100
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100k"
+        max-file: "20"
+    command: "npm install"
+      
+  node-srv2: 
+    image: arm32v6/node:16-alpine3.11
+    container_name: node-srv2
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - /home/pi/dockrepo/sysdata/raspi-test/srv2/:/home/node/app
+    #restart: on-failure:3
+    networks: 
+      gothingsnet:  
+        ipv4_address: 172.29.196.101
+      servicenet:  
+        ipv4_address: 172.29.195.101
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100k"
+        max-file: "20"
+    command: "npm install"

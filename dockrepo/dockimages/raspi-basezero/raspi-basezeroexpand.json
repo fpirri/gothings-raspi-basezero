@@ -1,0 +1,8 @@
+{
+  "type": "raspi",
+  "package": "raspi-basezero",
+  "status": "todo",
+  "filetargz": "dockrepo/dockimages/raspi-basezero/raspi-basezerodirs.tar.gz",
+  "githubgzfile": "https://github.com/fpirri/gothings-raspi-basezero/raw/main/raspi-basezerodirs.tar.gz",
+  "script": "none"
+}

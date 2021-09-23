@@ -1,0 +1,6 @@
+{
+  "type": "raspi",
+  "package": "raspi-basezero",
+   "status": "todo",
+   "script": "raspi-basezeroconfig.sh"
+}

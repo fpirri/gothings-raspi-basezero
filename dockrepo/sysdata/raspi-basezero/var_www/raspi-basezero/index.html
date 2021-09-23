@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<head>
+  <title>Test the NGINX PROXY homepage</title>
+  <script type="text/javascript">
+    var siteurl=document.URL;
+  </script>
+</head>
+<body>
+  <noscript><bold>Your browser does not support JavaScript!<br>
+    The page below may not display correctly.<br>
+    Please enable javascript in your browser to a correct functionality.<br></bold></noscript><br>
+    Test the NGINX PROXY homepage
+<hr><br>
+<h1>NGINX PROXY homepage</h1>
+<div>
+  &nbsp; &nbsp; this location: 
+  <script type="text/javascript">
+    document.write(siteurl)
+  </script>
+  <br>
+</div>
+<div>
+  <br><hr><hr>
+  &nbsp; &nbsp; PLEASE NOTE: this is a static page directly served by the nginx reverse proxy<br><br>
+  Here you may put an introduction explaining the content of this board<br>
+  It should be the 'presentation page' of your board<br>
+  <hr><hr>
+</div>
+<div>
+  <br><hr><hr>
+  &nbsp; &nbsp; You see this message when the nginx reverse proxy receives a home request<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; (a request with a null path)<br><br>
+  &nbsp; &nbsp; Service available here are:<br>
+  &nbsp; &nbsp; : <a href="./main">Main node js server static homepage</a><br>
+  &nbsp; &nbsp; : <a href="./srv2">Secondary node js server static homepage</a><br>
+  <hr><hr>
+  <br><br>this page: .../testraspi/index.html
+</div>
+</body>

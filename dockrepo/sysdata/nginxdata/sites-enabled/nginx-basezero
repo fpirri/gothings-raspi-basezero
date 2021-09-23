@@ -1,0 +1,131 @@
+##                                                                              2021-09-23
+#
+# Versione: raspi-basexero
+#
+#   @@@@@ PROXY TO RASPI-BASEZERO  @@@@@@@@@@@@@@@@@                 <-- DA FARE
+#
+# Versione raspi test:
+#   - accesso a due server nodejs                              <-- DA AGGIUSTARE
+#   - ognuno dei due server e' visto come sub-site             <-- DA AGGIUSTARE
+#
+#
+# Si verifica che:
+#   - il processo di install con npm abbia avuto buon fine
+#   - lo start di nodejs in ognuno dei container e' ok
+##
+#
+#
+#                                                 DA QUI IN POI:   DA AGGIUSTARE
+#
+################################################################################
+#
+#  DOC in .../github-gothings/gothings-raspi-test-aux/README-raspi-test
+#      cerca:     Test  |
+#         in:   *** Raspi Bootstrap ***
+#
+#
+#
+################################################################################
+#
+#  RASPITEST
+#
+#  - semplice test per verificare il funzionamento di due container nodejs
+#
+################################################################################
+#
+################################################################################
+server {###  test di contenitori nodejs / express - prot http ############################
+  listen 80;
+
+	access_log /dev/stdout gothings_services;
+  set $debug_value '|nginx: proxy TEST|';
+
+  set $main_server 'node-main:3000'; #     set name for main server
+  set $srv2_server 'node-srv2:3001'; #     set name for secondary server
+
+  root /var/www/testraspi/;#---------------------- root base === nginx raspitest
+  default_type 'text/html';
+  set $debug_value "|raspi-test site|";
+
+#
+################################################################################
+#  home della scheda
+#  per ogni servizio va aggiunta una home location
+#    <-- file statici per orientamento dell'accesso
+  location = / { #                                         homepage di testraspi
+    set $debug_value "|nginx: TEST raspi|";
+    index index.html
+    try_files index.html =404;
+  }
+
+
+#
+################################################################################
+#                                                               server node-main
+  location = /main { #                                               pagina home
+    set $debug_value "|nginx: TEST main home|";
+    index main.html;
+    try_files main.html /main.html =459;
+  }
+
+  location ~ ^/main/(.*)$ {  #                      proxy_pass to service 'main'
+    set $debug_value "|nginx: TEST main/$1|";
+    proxy_http_version 1.1;
+    proxy_cache_bypass $http_upgrade;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_pass http://$main_server/main/$1;
+}
+
+#
+################################################################################
+#                                                               server node-srv2
+  location = /srv2 { #                                               pagina home
+    set $debug_value "|nginx: TEST srv2 home|";
+    index srv2.html;
+    try_files srv2.html /srv2.html =469;
+  }
+
+  location ~ ^/srv2/(.*)$ {  #                              prova raspitest srv2
+    set $debug_value "|nginx: TEST srv2/$1|";
+    proxy_http_version 1.1;
+    proxy_cache_bypass $http_upgrade;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_pass http://$srv2_server/srv2/$1;
+}
+
+  #### CUSTOM ERROR pages ------------------ ERROR locations
+  #  locazione errori in test home
+  #
+  error_page 469 /custom_469.html;
+  error_page 459 /custom_459.html;
+  error_page 404 /custom_404.html;
+
+  location = /custom_404.html {
+    internal;
+    set $debug_value '|nginx proxy: test error 404|';
+    index custom_404.html;
+  }
+  location = /custom_469.html {
+    internal;
+    set $debug_value '|nginx: rsv2 error 469|';
+    index custom_469.html;
+  }
+  location = /custom_459.html {
+    internal;
+    set $debug_value '|nginx: main error 459|';
+    try_files custom_459.html =404;
+  }
+}
+#

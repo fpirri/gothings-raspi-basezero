@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<head>
+  <title>Test the SRV2 service homepage</title>
+  <script type="text/javascript">
+    var siteurl=document.URL;
+  </script>
+</head>
+<body>
+  <noscript>Your browser does not support JavaScript!<br>
+    The page below may not display correctly.<br>
+    Please enable javascript in your browser to a correct functionality.<br></noscript>
+    <br>
+    <h1>SRV2 service static homepage</h1>
+<hr><br>
+SRV2 service test page, served by nginx reverse proxy<br>
+  &nbsp; &nbsp; location: 
+  <script type="text/javascript">
+    document.write(siteurl)
+  </script>
+  <br>
+  <br><hr><hr>
+   &nbsp; &nbsp; PLEASE NOTE: This file is for test purposes only!<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; This message is directly served by the nginx reverse proxy<br>
+<hr><hr>
+<br><hr><hr>
+  This test shows two services, each implemented using the node js framework<br>
+  The services are almost identical, but show how you can have multiple applications behind nginx.<br>
+  You can add multiple containers, each one with its own service implemented in any language.<br>
+  Each service has its own internal URL, invisible to the external network<br>
+  To see dynamic pages served by the services you may use the links below:<br>
+  &nbsp; &nbsp; : <a href="./main/">Main node js server static homepage</a><br>
+  &nbsp; &nbsp; : <a href="./srv2/">Secondary node js server static homepage</a><br><br>
+<hr><hr>
+  <br><br>page: .../testraspi/srv2.html
+</body>
