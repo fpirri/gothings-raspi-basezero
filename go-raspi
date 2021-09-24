@@ -1,0 +1,188 @@
+#!/bin/bash
+#                                                                    2020-03-12
+#    GOTHINGS RASPI
+                                                                  Version="0.03"
+#  NOTA: primo tentativo 'manage raspi boards'
+#    derivato da g + gocloud-wp
+#    aggiunte da gothings-raspi-install
+#
+#
+#  Vedi doc in:
+#    .../github-gothings/gothings-raspi-basezero-aux/README-raspi-basezero
+#
+#
+#===============================================================================
+#                                                                 Organizzazione
+#
+#    passa il controllo a .../sysconfig/raspi-basezero/manage-raspi
+#
+#
+#
+################################################################################
+#
+#==============================================================================
+echo
+echo "========================================================= raspi GOTHINGS"
+echo
+echo "      Control loader for GOTHINGS on raspberry boards"
+echo
+echo "========================================================= version ${Version}"
+echo
+#
+#-----------------   local working 'globals' for the main application
+USERNAME="pi"
+HOMEDIR="/home/${USERNAME}/"
+cd ${HOMEDIR} # to work on user <USERNAME>  home
+#
+################################################################################
+#
+# get script name:
+ThisScript="$(basename "$0")"
+#
+################################################################################
+#
+# ----------------------------------
+# Mode: DEBUG
+DebugMode=0                     # 0 == NO debug     > 0 == Show debug info
+#
+# ----------------------------------
+# Define app
+AppName="basezero"
+AppDisplayName="BaseZero"
+AppType="cloud"
+GithubName="gothings-raspi-${AppName}"
+GithubPath="${GithubName}/main/"
+#
+# ----------------------------------
+# Define display
+MenuName="GoRaspi"
+MenuTag="${MenuName} v${Version}"
+#
+# ----------------------------------
+# variabili globali interne
+UserName=yesfi
+HomeDir="/home/${UserName}/"        # dir di lavoro per questo script
+Dockrepo="${HomeDir}dockrepo/"
+AppDir="${Dockrepo}sysdata/${AppName}/"
+AppConfigDir="${Dockrepo}sysconfig/${AppName}/"
+AppSecretDir="${Dockrepo}docksecret/${AppName}/"
+SiteFile="${AppDir}nginxdata/sites-enabled/${AppName}"
+SiteNginxDir="${Dockrepo}sysdata/nginx/nginxdata/sites-enabled/"
+WorkDir=${HomeDir}
+ScriptName="none"
+# -------------------------------------------------------  DA RIVEDERE alla fine
+#
+InstallDir="${HomeDir}dockrepo/dockimages/${AppName}/"     # dir dei file di configurazione nella droplet
+GithubHome="https://raw.githubusercontent.com/fpirri/"     # prefisso per i progetti fpirri su github
+#
+#  gothings-app-servicewp/main/dockrepo/dockimages/servicewp/servicewpexpand.json
+#
+# ------------------------------------------------------------------------------
+
+#
+MenuTrap=0                                 # segnalatore errore irreparabile
+RetValue=3                                 # 3--> OK     5--> KO
+# ----------------------------------
+# costanti varie
+Red='\033[0;41;30m'
+Std='\033[0;0;39m'
+#
+#
+##########################################################################
+#  Funzioni utili
+##########################################################################
+avanti(){
+# Domanda di continuazione personalizzabile
+# call:    avanti \$1
+#   \$1:   <stringa di domanda>
+  echo "----------------------------------------------------------------"
+  read -rsp "$1" -n 1 key
+  echo
+}
+#
+pause() {
+#  Domanda 'continue or exit'
+  avanti 'Press any key to continue or ^C to exit ...'
+}
+#
+##########################################################################
+dots(){
+# wait $1 seconds, printing dots on the screen
+#   $1 :  # of seconds to wait
+  local param1
+  printf -v param1 '%d\n' $1 2>/dev/null # converti in intero con tutti i controlli
+  while [ $param1 -gt 0 ]
+  do
+    echo -n "."
+    sleep 0.5
+    echo -n "."
+    sleep 0.5
+    let "--param1"
+  done
+}
+#
+##########################################################################
+dots_nl(){ #  Dots 'new line'
+# wait $1 seconds, printing dots on the screen
+#
+# add a newline at the end
+#
+  dots $1
+  echo
+}
+#
+##########################################################################
+toupdate(){
+  #  segnala funzione IN CORSO DI MODIFICA
+  echo 
+  echo
+  echo "------------------------------------------------------------ ???:"
+  echo
+  echo "This function is WORK IN PROGRESS"
+  echo "A new definition & rewriting is on course"
+  echo
+  #exit
+  pause "?"
+}
+#
+##########################################################################
+#
+#  usa le variabili:
+RED='\033[0;41;30m'
+STD='\033[0;0;39m'
+#
+confstop(){
+  if [[ ! -s "$1" ]]; then
+    #  Configurazione go-raspi non corretta
+    #    $1    nome del file mancante
+    echo
+    echo "----------------------------------------------------------------"
+    echo 
+    echo -e "${RED} file $1 is missing ${STD}"
+    echo
+    echo "Unfortunately, go-raspi cannot continue !"
+    echo "Please consult documentation, re-configure and retry"
+    echo
+    exit
+  fi
+}
+#
+################################################################################
+#
+################################################################################
+#                                                                     MAIN LOGIC
+#  cambia dir
+cd ${AppConfigDir}
+# esegui lo script
+echo "Go to management script"
+./manage-raspi
+echo
+echo "Type:"
+echo "  ./manage-raspi"
+echo "to exec raspberry management again"
+echo
+exit
+#
+#  RIPULIRE lo script dopo il test finale
+#
+##############
