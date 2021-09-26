@@ -1,7 +1,7 @@
 #!/bin/bash
 #                                                                    2020-03-12
-#    GOTHINGS RASPI
-                                                                  Version="0.03"
+#    GOTHINGS go to manage-raspi
+                                                                  Version="1.03"
 #  NOTA: primo tentativo 'manage raspi boards'
 #    derivato da g + gocloud-wp
 #    aggiunte da gothings-raspi-install
@@ -50,8 +50,6 @@ DebugMode=0                     # 0 == NO debug     > 0 == Show debug info
 AppName="basezero"
 AppDisplayName="BaseZero"
 AppType="cloud"
-GithubName="gothings-raspi-${AppName}"
-GithubPath="${GithubName}/main/"
 #
 # ----------------------------------
 # Define display
@@ -60,22 +58,12 @@ MenuTag="${MenuName} v${Version}"
 #
 # ----------------------------------
 # variabili globali interne
-UserName=yesfi
-HomeDir="/home/${UserName}/"        # dir di lavoro per questo script
+UserName=pi
+HomeDir="/home/${UserName}/"
 Dockrepo="${HomeDir}dockrepo/"
 AppDir="${Dockrepo}sysdata/${AppName}/"
-AppConfigDir="${Dockrepo}sysconfig/${AppName}/"
-AppSecretDir="${Dockrepo}docksecret/${AppName}/"
-SiteFile="${AppDir}nginxdata/sites-enabled/${AppName}"
-SiteNginxDir="${Dockrepo}sysdata/nginx/nginxdata/sites-enabled/"
-WorkDir=${HomeDir}
-ScriptName="none"
-# -------------------------------------------------------  DA RIVEDERE alla fine
-#
-InstallDir="${HomeDir}dockrepo/dockimages/${AppName}/"     # dir dei file di configurazione nella droplet
-GithubHome="https://raw.githubusercontent.com/fpirri/"     # prefisso per i progetti fpirri su github
-#
-#  gothings-app-servicewp/main/dockrepo/dockimages/servicewp/servicewpexpand.json
+SysConfigDir="${Dockrepo}sysconfig/"
+AppConfigDir="${Dockrepo}sysconfig/raspi-${AppName}/"
 #
 # ------------------------------------------------------------------------------
 
@@ -147,10 +135,6 @@ toupdate(){
 #
 ##########################################################################
 #
-#  usa le variabili:
-RED='\033[0;41;30m'
-STD='\033[0;0;39m'
-#
 confstop(){
   if [[ ! -s "$1" ]]; then
     #  Configurazione go-raspi non corretta
@@ -158,7 +142,7 @@ confstop(){
     echo
     echo "----------------------------------------------------------------"
     echo 
-    echo -e "${RED} file $1 is missing ${STD}"
+    echo -e "${Red} file $1 is missing ${Std}"
     echo
     echo "Unfortunately, go-raspi cannot continue !"
     echo "Please consult documentation, re-configure and retry"
@@ -167,15 +151,101 @@ confstop(){
   fi
 }
 #
+##########################################################################
+getgitfile(){    # Lettura file da github
+  #
+  #  use globals:
+  #    DEBUGLOG=""     # utile nel debug
+  #    ITEXISTS=0      #  1 : file esiste    0 : file assente
+  #
+  #
+  #     <-- se esiste il file $1 ed ha lunghezza > 0 :
+  #         <-- si va avanti senza altre azioni
+  #     <-- altrimenti si prova a scaricare il file da github
+  #     <-- si riprova il test di lunghezza
+  #         se non funziona si torna con ITEXISTS=0
+  #     
+  # call:    getgitfile $1 $2 $3
+  #   $1:    "file"                           <--  raspi-testdirs.tar.gz
+  #   $2:    "github project branch"          <--  gothings-raspi-install/master/
+  #   $3:    "raspi path after /home/pi/ "    <--  ''
+  # path fisso per gothings:
+  #   Const: "https://github.com/fpirri/"
+#  https://github.com/fpirri/gothings-raspi-basezero/raw/main/dockrepo/sysconfig/raspi-basezero/manage-raspi
+  #
+  # RETURN:
+  #           ITEXISTS = 1 se esiste, 0 altrimenti
+  #
+  # Verify file existence, get it from github if not
+  #
+  #  bash:  -s file  True if file exists and has a size greater than zero
+  #
+  FILEGIT="/home/pi/$3$1"
+  DEBUGLOG="|| getgitfile() INFO || Il file cercato e': $FILEGIT |"
+  if [[ -s $FILEGIT ]]
+  then
+    ITEXISTS=1    # file exists and length > 0
+    DEBUGLOG="$DEBUGLOG | $FILEGIT esiste |"
+  else            # si prova a scaricarlo
+    DEBUGLOG="$DEBUGLOG | $FILEGIT does not exist |"
+    
+    wget -O $FILEGIT https://github.com/fpirri/$2$1
+    if [[ -s $FILEGIT ]]
+    then
+      ITEXISTS=1    # file exists and length > 0
+      DEBUGLOG="$DEBUGLOG | $FILEGIT trovato |"
+    else
+      ITEXISTS=0    # file introvabile !
+      DEBUGLOG="$DEBUGLOG | $FILEGIT introvabile |"
+      echo $DEBUGLOG                               ########### Stampa sempre mentre sviluppo ...
+    fi
+  fi
+  return $ITEXISTS
+}
+#
 ################################################################################
 #
 ################################################################################
 #                                                                     MAIN LOGIC
+#  set dirs
+echo
+echo "Verify directory structure ..."
+# la prima volta non ci sono i dirs, creiamoli !
+#
+# ~/dockrepo/
+  if [ ! -d "${Dockrepo}" ]; then
+    mkdir "${Dockrepo}"
+  fi
+# ~/dockrepo/sysconfig/
+  if [ ! -d "${SysConfigDir}" ]; then
+    mkdir "${SysConfigDir}"
+  fi
+# ~/dockrepo/sysconfig/raspi-basezero
+  if [ ! -d "${AppConfigDir}" ]; then
+    mkdir "${AppConfigDir}"
+  fi
+#
+#  prendi 'manage-raspi' da github & rendilo eseguibile
+#  https://github.com/fpirri/gothings-raspi-basezero/main/dockrepo/sysconfig/raspi-basezero/manage-raspi
+#
+File="manage-raspi"
+PiDir="dockrepo/sysconfig/raspi-basezero/"       # path da aggiungere a HOMEDIR == /home/pi/
+GitBr="gothings-raspi-basezero/raw/main/${PiDir}"            # github branch/dir dove va preso il file
+Call="${File} $GitBr $PiDir"
+getgitfile ${Call}
+if [[ $ITEXISTS -ne 1 ]]
+then
+  confstop ${File}
+else
+  chmod +x ${AppConfigDir}${File}
+fi
+#
 #  cambia dir
 cd ${AppConfigDir}
+#
 # esegui lo script
 echo "Go to management script"
-./manage-raspi
+./${File}
 echo
 echo "Type:"
 echo "  ./manage-raspi"
