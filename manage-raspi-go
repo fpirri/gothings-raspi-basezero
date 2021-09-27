@@ -24,32 +24,22 @@
 echo
 echo "========================================================= raspi GOTHINGS"
 echo
-echo "      Control loader for GOTHINGS on raspberry boards"
+echo "      Boot loader for GOTHINGS on raspberry boards"
 echo
 echo "========================================================= version ${Version}"
 echo
-#
-#-----------------   local working 'globals' for the main application
-USERNAME="pi"
-HOMEDIR="/home/${USERNAME}/"
-cd ${HOMEDIR} # to work on user <USERNAME>  home
-#
-################################################################################
-#
-# get script name:
-ThisScript="$(basename "$0")"
 #
 ################################################################################
 #
 # ----------------------------------
 # Mode: DEBUG
-DebugMode=0                     # 0 == NO debug     > 0 == Show debug info
+DebugMode=1                     # 0 == NO debug     > 0 == Show debug info
 #
 # ----------------------------------
 # Define app
 AppName="basezero"
 AppDisplayName="BaseZero"
-AppType="cloud"
+AppType="raspi"
 #
 # ----------------------------------
 # Define display
@@ -60,10 +50,10 @@ MenuTag="${MenuName} v${Version}"
 # variabili globali interne
 UserName=pi
 HomeDir="/home/${UserName}/"
-Dockrepo="${HomeDir}dockrepo/"
-AppDir="${Dockrepo}sysdata/${AppName}/"
-SysConfigDir="${Dockrepo}sysconfig/"
-AppConfigDir="${Dockrepo}sysconfig/raspi-${AppName}/"
+DockDir="${HomeDir}dockrepo/"
+AppDir="${DockDir}sysdata/${AppName}/"
+SysConfigDir="${DockDir}sysconfig/"
+AppConfigDir="${SysConfigDir}${AppType}-${AppName}/"
 #
 # ------------------------------------------------------------------------------
 
@@ -147,7 +137,6 @@ confstop(){
     echo "Unfortunately, go-raspi cannot continue !"
     echo "Please consult documentation, re-configure and retry"
     echo
-    exit
   fi
 }
 #
@@ -168,7 +157,7 @@ getgitfile(){    # Lettura file da github
   # call:    getgitfile $1 $2 $3
   #   $1:    "file"                           <--  raspi-testdirs.tar.gz
   #   $2:    "github project branch"          <--  gothings-raspi-install/master/
-  #   $3:    "raspi path after /home/pi/ "    <--  ''
+  #   $3:    "raspi path"                     <--  include /home/pi/
   # path fisso per gothings:
   #   Const: "https://github.com/fpirri/"
 #  https://github.com/fpirri/gothings-raspi-basezero/raw/main/dockrepo/sysconfig/raspi-basezero/manage-raspi
@@ -180,23 +169,23 @@ getgitfile(){    # Lettura file da github
   #
   #  bash:  -s file  True if file exists and has a size greater than zero
   #
-  FILEGIT="/home/pi/$3$1"
-  DEBUGLOG="|| getgitfile() INFO || Il file cercato e': $FILEGIT |"
-  if [[ -s $FILEGIT ]]
+  FileGit="$3$1"
+  DEBUGLOG="|| getgitfile() INFO || Il file cercato e': $FileGit |"
+  if [[ -s $FileGit ]]
   then
     ITEXISTS=1    # file exists and length > 0
-    DEBUGLOG="$DEBUGLOG | $FILEGIT esiste |"
+    DEBUGLOG="$DEBUGLOG | $FileGit esiste |"
   else            # si prova a scaricarlo
-    DEBUGLOG="$DEBUGLOG | $FILEGIT does not exist |"
+    DEBUGLOG="$DEBUGLOG | $FileGit does not exist |"
     
-    wget -O $FILEGIT https://github.com/fpirri/$2$1
-    if [[ -s $FILEGIT ]]
+    wget -O $FileGit https://github.com/fpirri/$2$1
+    if [[ -s $FileGit ]]
     then
       ITEXISTS=1    # file exists and length > 0
-      DEBUGLOG="$DEBUGLOG | $FILEGIT trovato |"
+      DEBUGLOG="$DEBUGLOG | $FileGit trovato |"
     else
       ITEXISTS=0    # file introvabile !
-      DEBUGLOG="$DEBUGLOG | $FILEGIT introvabile |"
+      DEBUGLOG="$DEBUGLOG | $FileGit introvabile |"
       echo $DEBUGLOG                               ########### Stampa sempre mentre sviluppo ...
     fi
   fi
@@ -213,8 +202,8 @@ echo "Verify directory structure ..."
 # la prima volta non ci sono i dirs, creiamoli !
 #
 # ~/dockrepo/
-  if [ ! -d "${Dockrepo}" ]; then
-    mkdir "${Dockrepo}"
+  if [ ! -d "${DockDir}" ]; then
+    mkdir "${DockDir}"
   fi
 # ~/dockrepo/sysconfig/
   if [ ! -d "${SysConfigDir}" ]; then
@@ -229,30 +218,21 @@ echo "Verify directory structure ..."
 #  https://github.com/fpirri/gothings-raspi-basezero/main/dockrepo/sysconfig/raspi-basezero/manage-raspi
 #
 File="manage-raspi"
-PiDir="dockrepo/sysconfig/raspi-basezero/"       # path da aggiungere a HOMEDIR == /home/pi/
-GitBr="gothings-raspi-basezero/raw/main/${PiDir}"            # github branch/dir dove va preso il file
-Call="${File} $GitBr $PiDir"
-getgitfile ${Call}
+GitBr="gothings-raspi-basezero/raw/main/${AppConfigDir}"      # github branch/dir dove va preso il file
+getgitfile ${File} $GitBr $AppConfigDir
 if [[ $ITEXISTS -ne 1 ]]
 then
   confstop ${File}
+  return 2
 else
   chmod +x ${AppConfigDir}${File}
-fi
-#
 #  cambia dir
-cd ${AppConfigDir}
+  cd ${AppConfigDir}
 #
 # esegui lo script
-echo "Go to management script"
-./${File}
-echo
-echo "Type:"
-echo "  ./manage-raspi"
-echo "to exec raspberry management again"
-echo
-exit
+  echo "Go to management script"
+  ./${File}
+fi
 #
-#  RIPULIRE lo script dopo il test finale
-#
+echo
 ##############
