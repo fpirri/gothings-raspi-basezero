@@ -38,20 +38,16 @@ ThisScript="$(basename "$0")"
 #
 # ----------------------------------
 # Define app
-AppName="basezero"
-AppDisplayName="BaseZero"
 AppType="raspi"
-#
-# ----------------------------------
-# Define display
-MenuName="GoRaspi"
-MenuTag="${MenuName} v${Version}"
+AppName="${AppType}-basezero"
+AppDisplayName="BaseZero"
 #
 # ----------------------------------
 # variabili globali interne
 UserName=pi
 HomeDir="/home/${UserName}/"
 DockDir="${HomeDir}dockrepo/"
+InstallDir="${DockDir}dockimages/${AppName}/"     # dir dei file di configurazione nella droplet
 AppDir="${DockDir}sysdata/${AppName}/"
 SysConfigDir="${DockDir}sysconfig/"
 AppConfigDir="${SysConfigDir}${AppType}-${AppName}/"
@@ -90,22 +86,8 @@ oldnames(){
       GithubPath="${GithubName}/main/"
       #
       # ----------------------------------
-      # Define display
-      MenuName="WP Sercices"
-      MenuTag="${MenuName} v${Version}"
-      #
-      # ----------------------------------
       # variabili globali interne
-      UserName=yesfi
-      HomeDir="/home/${UserName}/"        # dir di lavoro per questo script
-      Dockrepo="${HomeDir}dockrepo/"
-      AppDir="${Dockrepo}sysdata/${AppName}/"
-      AppConfigDir="${Dockrepo}sysconfig/${AppName}/"
-      AppSecretDir="${Dockrepo}docksecret/${AppName}/"
-      SiteFile="${AppDir}nginxdata/sites-enabled/${AppName}"
       SiteNginxDir="${Dockrepo}sysdata/nginx/nginxdata/sites-enabled/"
-      WorkDir=${HomeDir}
-      ScriptName="none"
       # -------------------------------------------------------  DA RIVEDERE alla fine
       #
       InstallDir="${HomeDir}dockrepo/dockimages/${AppName}/"     # dir dei file di configurazione nella droplet
@@ -115,11 +97,6 @@ oldnames(){
       #
       # ------------------------------------------------------------------------------
 }
-echo
-echo "Verifichiamo i nomi delle variabili interne:"
-echo "AppName = ${AppName}"
-echo
-exit
 #
 ##########################################################################
 #  Funzioni utili
@@ -860,18 +837,9 @@ echo "Executing ${ThisScript}"
 echo -e "Gestione della app ${AppDisplayName} - ${Red} versione in sviluppo ${Std}"
 echo
 dots_nl 2
-
-#
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-#
-echo "TEST version !!!  6"
-echo "Stop di verifica!"
-exit
-#
-
 #
 # Comunica dove siamo
-cd ${WorkDir}
+cd ${AppConfigDir}
 echo
 echo -n "Dir di lavoro: "
 pwd
@@ -885,35 +853,57 @@ dots_nl 3
 ################################################################################
 ############################################     SERVICEWP GO - main logic   ###
 ################################################################################
+
+
+
+
 #
 echo
 echo "Verify directory structure ..."
+echo
 # la prima volta non ci sono i dirs, creiamoli !
+#
+# HomeDir="/home/${UserName}/ "
+# DockDir="${HomeDir}dockrepo/ "
+echo "1- \$DockDir : $DockDir "
 if [[ ! -s "${HomeDir}dockrepo" ]]; then
-  mkdir dockrepo/
+  mkdir "${HomeDir}dockrepo"
 fi
-if [[ ! -s "${HomeDir}dockrepo/dockimages" ]]; then
-  mkdir dockrepo/dockimages
+#
+# InstallDir="${DockDir}dockimages/${AppName}/ "
+echo "2- \$InstallDir : $InstallDir "
+if [[ ! -s "${DockDir}dockimages" ]]; then
+  mkdir "${DockDir}dockimages1"
 fi
-if [[ ! -s "${HomeDir}dockrepo/dockimages/${AppName}" ]]; then
-  mkdir dockrepo/dockimages/${AppName}
+if [[ ! -s "${InstallDir}" ]]; then
+  mkdir "${InstallDir}"
 fi
-if [[ ! -s "${HomeDir}dockrepo/sysdata" ]]; then
-  mkdir dockrepo/sysdata
+#
+# AppDir="${DockDir}sysdata/${AppName}/ "
+echo "3- \$AppDir : $AppDir "
+if [[ ! -s "${DockDir}sysdata" ]]; then
+  mkdir "${DockDir}sysdata"
 fi
-if [[ ! -s "${HomeDir}dockrepo/sysdata/${AppName}" ]]; then
-  mkdir dockrepo/sysdata/${AppName}
+if [[ ! -s "${AppDir}" ]]; then
+  mkdir "${AppDir}"
 fi
-if [[ ! -s "${HomeDir}dockrepo/sysconfig" ]]; then
-  mkdir dockrepo/sysconfig
+#
+# SysConfigDir="${DockDir}sysconfig/ "
+echo "4- \$SysConfigDir : $SysConfigDir "
+if [[ ! -s "${SysConfigDir}" ]]; then
+  mkdir "${SysConfigDir}"
 fi
-if [[ ! -s "${HomeDir}dockrepo/sysconfig/${AppName}" ]]; then
-  mkdir dockrepo/sysconfig/${AppName}
+#
+# AppConfigDir="${SysConfigDir}${AppType}-${AppName}"
+echo "5- \$AppConfigDir : $AppConfigDir "
+if [[ ! -s "${AppConfigDir}" ]]; then
+  mkdir "${AppConfigDir}"
 fi
 #
 MenuTrap=0 #-------------- per ora non ci sono errori ...
 #
 if [[ ${MenuTrap} -eq 0 ]]; then #In effetti, non servirebbe, ma scrivo cosi' per uniformita' ...
+  echo "Verifica dirs eseguita ..."
 fi
 #
 

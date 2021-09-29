@@ -37,14 +37,9 @@ DebugMode=1                     # 0 == NO debug     > 0 == Show debug info
 #
 # ----------------------------------
 # Define app
-AppName="basezero"
-AppDisplayName="BaseZero"
 AppType="raspi"
-#
-# ----------------------------------
-# Define display
-MenuName="GoRaspi"
-MenuTag="${MenuName} v${Version}"
+AppName="${AppType}-basezero"
+AppDisplayName="BaseZero"
 #
 # ----------------------------------
 # variabili globali interne
@@ -53,7 +48,7 @@ HomeDir="/home/${UserName}/"
 DockDir="${HomeDir}dockrepo/"
 AppDir="${DockDir}sysdata/${AppName}/"
 SysConfigDir="${DockDir}sysconfig/"
-AppConfigDir="${SysConfigDir}${AppType}-${AppName}/"
+AppConfigDir="${SysConfigDir}${AppName}/"
 #
 # ------------------------------------------------------------------------------
 
